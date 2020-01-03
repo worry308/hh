@@ -1,0 +1,13 @@
+MySQL
+Uptime---已经运行的时长
+Slow_queries---慢查询
+Com_update---
+Com_select---查询
+Com_rollback---回滚语句
+Com_delete---删除
+Com_insert---插入
+Com_commit---
+Bytes_sent---发送的字节
+Bytes_received---丢失字节
+Com_begin---begin语句
+

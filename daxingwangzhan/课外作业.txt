@@ -1,0 +1,134 @@
+100   服务器已收到请求的一部分，正在等待其余部分
+200   请求被正常处理
+204   请求被受理但没有资源可以返回
+301   永久重定向 
+302   临时重定向
+400   语法有误，服务器无法识别
+403   禁止访问
+404   服务器无法找到对应资源
+500   服务器内部错误
+503   服务器正忙
+
+扩展知识
+1.网站压力测试有哪些，怎么用
+Web Bench
+linux下使用wget下载远程webbench文件
+wget http://home.tiscali.cz/~cz210552/distfiles/webbench-1.5.tar.gz
+tar解压要编译的文件
+tar zxvf webbench-1.5.tar.gz
+编译源代码和安装文件
+cd webbench-1.5
+vim Makefile （自定义安装路径，PREFIX?= /opt/webbench/）
+make && make install
+
+ab
+使用方法:  ./ab [options] [http[s]://]hostname[:port]/path
+
+2.CDN厂商
+专业CDN服务商，代表企业：蓝汛、帝联科技等
+国外CDN服务商，代表企业：Akamai、Limelight Networks等
+免费自助CDN，国内的Webluker，国外的cloudflare
+
+3.动态网站架构有哪些，区别
+LAMP  LNMP
+apache因为把php模块集于一身成为一个整体，任何请求访问（静态，动态）
+都是apache（httpd）自己搞定的， 而nginx仅仅是一个传递的角色。它可以
+处理静态（图片，js，css等）,但php相关的就得由后面的php-fpm来处理市
+面上开源的主流监控器
+
+4.硬件负载均衡设备
+F5---BIG-IP负载均衡器
+思科---思科几乎每个IOS路由器都具有负载均衡功能（端口绑定，会话交换，TCP优化）
+梭子鱼负载均衡---最大特点是包含了网络安全功能
+
+5.开源高可用产品程序
+Linux-HA高可用开源方案
+keepalived---笔记大型网站11
+Heartbeat最核心的两部分就是：心跳检测和资源监管
+
+6.HAproxy8种轮询方式
+①balance roundrobin # 轮询，软负载均衡基本都具备这种算法
+
+
+②balance static-rr # 根据权重，建议使用
+
+
+③balance leastconn # 最少连接者先处理，建议使用
+
+
+④balance source # 根据请求源IP，建议使用
+
+
+⑤balance uri # 根据请求的URI
+
+
+⑥balance url_param，# 根据请求的URl参数'balance url_param' requires an URL parameter name
+
+
+⑦balance hdr(name) # 根据HTTP请求头来锁定每一次HTTP请求
+
+
+⑧balance rdp-cookie(name) # 根据据cookie(name)来锁定并哈希每一次TCP请求
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+由于负载请求分发到不同服务器，可能导致Session会话不同步的问题，若想实现会话共享或保持，可采用如下3种方式：
+
+1.用户IP 识别
+
+haroxy 将用户IP经过hash计算后 指定到固定的真实服务器上（类似于nginx 的IP hash 指令）
+
+配置指令
+
+balance source
+
+2.Cookie 识别
+
+haproxy 将WEB服务端发送给客户端的cookie中插入(或添加加前缀)haproxy定义的后端的服务器COOKIE ID。
+
+配置指令例举
+
+cookie SESSION_COOKIE insert indirect nocache
+
+用firebug可以观察到用户的请求头的cookie里 有类似” Cookie jsessionid=0bc588656ca05ecf7588c65f9be214f5; SESSION_COOKIE=app1” SESSION_COOKIE=app1就是haproxy添加的内容
+
+3.Session 识别
+
+haproxy 将后端服务器产生的session和后端服务器标识存在haproxy中的一张表里。客户端请求时先查询这张表。
+
+配置指令例举
+
+appsession JSESSIONID len 64 timeout 5h request-learn
+
+点赞 2
+收藏
+分享
+  
+csdn风清扬
+发布了60 篇原创文章 · 获赞 68 · 访问量 1450万+
+他的留言板
+关注
+
+
+
+
+
+实操
+部署phpmyadmin
+部署mysql proxy，实现读写分离
+pxe+kis start无人值守自动化安装操作系统
+squid实现正向代理
+部署上线weblogic
+

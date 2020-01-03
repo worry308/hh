@@ -1,0 +1,83 @@
+SVN部署
+1.查看SVN版本   svnserve --version
+	无SVN，安装  yum -y install subversion
+2.创建SVN版本库，也就是项目要存放的仓库
+	mkdir /var/svn -p     创建所有项目的主目录
+	svnadmin create /var/svn/svnrepos     创建一个名为svnrepos的版本库
+	创建版本库之后，在/var/svn/svnrepos文件夹下生成以下文件
+	conf  db  format  hooks  locks  README.txt
+3.配置代码库
+	cd /var/svn/svnrepos/conf/     有如下文件：authz  passwd  svnserve.conf
+	authz是权限控制文件，负责账号权限的管理，控制账号的读写权限
+	passwd是账户密码文件，负责账户密码的用户名单管理
+	svnserve.conf是svn服务配置文件
+	
+vim passwd     设置可以访问这个远程仓库的人的账号密码
+	在[users]下面增加用户密码的设置
+	[users]
+	admin = admin
+	user1 = 123456
+
+vim authz     在[groups]中设置组和组员
+	admin = admin,user1
+	user = user1
+	#加一个[/]仓库根目录的访问权限，用户都有读写权限
+	@admin = rw
+	@user = rw
+	不直接对特定用户设置权限，而是对组进行授权，将用户加入该组。
+
+vim svnserve.conf    主要设置帐号，和权限。还有当前项目的版本库所在目录
+避免相对定位出错，这里直接使用绝对路径设置版本库所在目录
+	anon-access = none      #匿名用户不可访问
+	auth-access = write      #授权用户可写
+	password-db = /var/svn/svnrepos/conf/passwd       #使用哪个文件作为账号文件
+	authz-db = /var/svn/svnrepos/conf/authz           #使用哪个文件作为权限文件
+	realm = /var/svn/svnrepos        # 认证空间名，版本库所在目录
+
+4.启动svn
+	svnserve -d -r /var/svn/
+	让svn以deamon守护进程方式 以root用户启动运行。
+
+	注意，这路径不能到ProjectName
+	否则在访问时候会报svn: E170000: URL 'svn://虚拟机ip地址/ProjectName' doesn't exist
+
+5.测试
+	在linux服务器输入命令测试：
+	svn co svn://192.168.37.133:3690/svnrepos
+
+
+	在Windows客户端使用tortoisesvn进行测试
+	svn://192.168.37.133:3690/svnrepos
+
+6.导入工程
+	cd /var/svn
+	mkdir MyProject
+	mkdir MyProject/trunk
+	mkdir MyProject/branches
+	mkdir MyProject/tags
+	svn import MyProject svn://192.168.37.133/svnrepos/MyProject -m "first import project"
+
+7.http访问设置
+	yum -y install httpd      安装Apache
+	yum install mod_dav_svn
+	yum install mod_authz_svn    安装必备组件
+创建加密授权
+	先创建授权文件
+		touch /var/svn/svnrepos/conf/accesspwd
+	设置用户密码
+		htpasswd /var/svn/svnrepos/conf/accesspwd user1
+	配置代理文件
+		vim /etc/httpd/conf.d/subversion.conf
+			<Location /svn/>
+			DAV svn
+			SVNListParentPath on
+			SVNParentPath /var/svn/
+			AuthType Basic
+			AuthName "Subversion repos"
+			AuthzSVNAccessFile /var/svn/svnrepos/conf/authz
+			AuthUserFile /var/svn/svnrepos/conf/accesspwd
+			Require valid-user
+			</Location>
+	重启httpd
+	systemctl restart httpd
+	使用http://192.168.37.133/svn/svnrepos/在浏览器访问即可。

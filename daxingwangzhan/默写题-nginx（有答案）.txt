@@ -1,0 +1,205 @@
+1.写出Nginx通过代理服务器，获取访问用户的ip的配置。
+server {
+    listen 80;
+    server_name _;
+    location / {
+    	..................
+        proxy_pass         http://127.0.0.1:8000/; jb,
+        # $host 变量，Host 为变量名 
+        proxy_set_header   Host             $host;
+        proxy_set_header   X-Real-IP        $remote_addr;						
+        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+        
+    }
+}
+
+2.写出Nginx的一个简单虚拟主机，监控www.qianfeng.com的80端口，当匹配到/qianfeng时，跳转到后台10.10.7.163的8080端口
+server {
+    listen 80;
+    server_name www.qianfeng.com;
+    location /qianfeng {
+        proxy_pass         http://10.10.7.163:8080;
+    }
+}
+
+
+
+3.列出常见的http状态码，并加以说明
+   100   服务器已收到请求的一部分，正在等待其余部分
+   200   请求被正常处理
+   204   请求被受理但没有资源可以返回
+   301   永久重定向 
+   302   临时重定向
+   400   语法有误，服务器无法识别
+   403   禁止访问
+   404   服务器无法找到对应资源
+   500   服务器内部错误
+   503   服务器正忙
+
+4.简述GET和POST请求，并写出Nginx只允许GET和POST请求的配置。
+GET：
+GET通常用于获取服务端数据。
+GET方式提交数据特点：
+1、get方式在url后面拼接参数，只能以文本的形式传递参数。
+2、传递的数据量小，4kb左右（不同浏览器会有差异）。
+3、安全性低，会将信息显示在地址栏。
+4、速度快，通常用于对安全性要求不高的请求
+POST：
+POST就是发送、提交。可以向指定的资源提交要被处理的数据。
+post提交数据相对于get的安全性高一些。
+传递数据量大，请求对数据长度没有要求。
+请求不会被缓存，也不会保留在浏览器的历史记录中。
+用于密码等安全性要求高的场合，提交数据量较大的场合，如上传文件，发布文章等。
+POST方式提交数据上限默认为8M（可以在PHP的配置文件post_max_size选项中修改）
+如果使用表单方式进行提交，表单的method必须设置为POST。
+
+if ($request_method !~* GET|POST) {
+            return 403;
+        }
+
+
+5.Nginx是如何处理一个请求的呢？
+请求会根据host进行匹配，如果找到匹配项，就去匹配的项目上请求。
+如果没有找到匹配项，就会去这个端口默认的服务请求，也就是默认的
+serve_name，默认的server_name 怎么判定，默认的是写在这个端口
+上的第一个server，就默认为他是默认服务
+
+6.如何开启Nginx压缩功能，并设置上传文件的格式和大小。
+开启gzip的指令如下：
+gzip on;
+gzip_http_version 1.0;
+gzip_disable "MSIE [1-6].";
+gzip_types text/plain application/x-javascript text/css text/javascript;
+
+设置上传文件的格式和大小：
+在http{}中添加一个client_max_body_size 20m
+
+
+
+7.tomcat内存优化中，内存溢出的处理办法？
+首先，需要先把tomcat服务关闭，以防服务器宕机，通过修改初始化内存，最大内存等信息
+然后tomcat的catalina.sh文件，在第一行的后面增加一句：
+JAVA_OPTS='-server -Xms256m -Xmx512m -XX:PermSize=128M -XX:MaxPermSize=256M'
+-Xms256m是最小内存，-Xmx512m是最大内存，其中的256与512可根据你自己的内存做相应调整，
+PermSize/MaxPermSize最小/最大堆大小.一般报内存不足时,都是说这个太小,堆空间剩余小于5%就会
+警告,建议把这个稍微设大一点,不过要视自己机器内存大小来设置
+
+
+
+8.如何修改Tomcat的默认端口和默认发布目录路径
+找到tomcat的安装路径，进去conf目录，打开server.xml,找到8080，修改为自己想设置的端口
+同样在server.xml文件里面修改
+
+9.tomcat进程打开的所有文件
+查出tomcat的进程号    然后lsof –p pid |wc –l 
+ps aux |grep tomact
+
+10.写一个自动启动tomcat的脚本
+可以每分钟查看tomcat进程是否存在，如果不存在，就启动tomcat进程
+#!bin/bash
+if [$?-eq0]
+
+then {
+
+/usr/local/tomcat/bin/startup.sh
+
+}
+
+else
+
+echo "tomcat is alive!";
+fi
+
+11. Tomcat服务的配置文件是哪个？后端Java，客户端访问慢，从哪几点考虑？
+   tomcat服务的配置文件是server.xml
+   服务器内存；java虚拟机内存分配问题
+   并发设置；进程设置
+
+12.如何优化linux操作系统
+   更改默认ssh端口，禁止root用户登录，采用私钥的连接方式
+   定时自动更新服务方式器时间
+   调整文件描述符的数量 
+   设置自启动服务
+   修改内核参数/etc/sysctl.conf    sysctl –p生效
+   更改字符集
+
+13.你用过几种中间件/web应用服务器软件产品，各是什么？
+中间件：php: php-fpm  ---  php-mysql    ---  php-gd   ---  php-cli
+Jsp:Tomcat  Resin  JBOSS  WebSphere  Weblogic
+
+Web应用服务器软件产品：
+Apache，由于其跨平台和安全性被广泛使用
+Nginx免费开放源代码的Web应用服务器
+
+14.说明Nginx和Apacache作为web服务器的区别？
+相比 Apache，Nginx 使用更少的资源，支持更多的并发连接，
+体现更高的效率，这点使 Nginx 尤其受到虚拟主机提供商的欢
+迎。在高连接并发的情况下，Nginx是Apache服务器不错的替
+代品:能够支持高达 50,000 个并发连接数的响应。
+
+Nginx作为负载均衡服务器: Nginx 既可以在内部直接支持 Rails
+和 PHP 程序对外进行服务, 也可以支持作为 HTTP代理服务器对
+外进行服务.
+Nginx采用C进行编写, 不论是系统资源开销还是CPU使用效率都
+比 Perlbal 要好很多.
+
+Nginx 配置简洁, Apache 复杂
+Nginx 静态处理性能比 Apache 高 3倍以上
+Apache 对 PHP 支持比较简单，Nginx 需要配合其他后端用
+Apache 的组件比 Nginx 多
+
+
+
+15.列出Nginx的5条调优策略
+#这里的数值不能超过 CPU 的总核数，因为在单个核上部署超过 
+   1个 Nginx 服务进程并不起到提高性能的作用。
+    worker_processes 24;
+#Nginx 最大可用文件描述符数量，同时需要配置操作系统的 "ulimit -n 200000"，
+   或者在 /etc/security/limits.conf 中配置。 
+    worker_rlimit_nofile 200000;
+# 只记录 critical 级别的错误日志
+    error_log /var/log/nginx/error.log crit
+#配置单个 Nginx 单个进程可服务的客户端数量，
+（最大值客户端数 = 单进程连接数 * 进程数 ）
+#最大客户端数同时也受操作系统 socket 连接数的影响（最大 64K ）
+    worker_connections 4000;
+# 允许尽可能地处理更多的连接数，如果 worker_connections 配置太低，
+   会产生大量的无效连接请求。
+    multi_accept on;
+	
+
+16.常用的HTTP方法有哪些？
+GET	从服务器获取一份文档	不需要主体
+HEAD	只从服务器获取文档首部	不需要主体
+POST	向服务器发送需要处理的数据	需要主体
+PUT	将请求的主体内容存在服务器上	需要主体
+TRACE	对可能经过代理服务器传送到服务器上的报文进行追踪	不需要主体
+OPTIONS	可以决定在服务器上可以执行哪些方法	不需要主体
+DELETE	从服务器上删除一份文档	不需要主体
+
+17.http和https的区别
+https协议需要到ca申请证书，一般免费证书较少，因而需要一定费用。(阿里云厂商提供免费证书)
+http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。
+http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。
+http的连接很简单，是无状态的；HTTPS协议是由SSL+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。
+
+
+18.Nginx访问页面报错403,502如何解决，写出思路
+403检查所访问文件的权限，检查Nginx配置文件指定的用户
+502检查后台服务是否运行正常
+
+
+19.Nginx配置禁止访问/var/nginx目录
+location = /var/nginx/ { 
+return 404; 
+} 
+
+20.为什么Nginx性能这么高？
+作为Web服务器：Nginx使用资源少，支持更多的并发连接。
+
+作为负载均衡服务器：Nginx 既可以在内部直接支持 Rails 和 PHP，
+也可以支持作为 HTTP代理服务器 对外进行服务。Nginx 用 C 编写,
+不论是系统资源开销还是 CPU 使用效率都比 Perlbal 要好的多。
+
+
+

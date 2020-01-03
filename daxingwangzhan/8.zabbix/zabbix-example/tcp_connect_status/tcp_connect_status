@@ -1,0 +1,1 @@
+UserParameter=tcp.connect.status[*],/etc/zabbix/tcp_connect.status/tcp_connect_status.sh $1

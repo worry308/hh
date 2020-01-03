@@ -1,0 +1,128 @@
+1.使用一条命令，创建/usr/local/tomcat/temp目录，并显示创建过程。
+mkdir -pv /usr/local/tomcat/temp
+
+2.将/usr/local/java/jre/lib/management/jmxremote.password.template文件，重命名为jmxremote.password.
+mv /usr/local/java/jre/lib/management/jmxremote.password.template /usr/local/java/jre/lib/management/jmxremote.password
+
+3.查看/root下的所有文件的详细信息， 包括隐藏文件
+ls -al /root
+
+4.为“fdisk -l  /dev/sdb”命令，自定义新的别名。
+alias fff='fdisk -l  /dev/sdb'
+
+5.vim操作，复制从本行开始的三行，粘贴在光标之后，删除从本行开始的三行，从上而下查找str，从下而上查找str，查找下一个字符串，vi模式在第5行，读入/1.txt文件的内容。
+	3yy	复制从本行开始的三行
+	p	粘贴在光标之后
+	3dd	删除从本行开始的三行
+	/str	从上而下查找str
+	?str	从下而上查找str
+	n	查找下一个
+	5（第五行）r /1.txt
+
+6.设置/usr/share/mysql/data文件的属主为mysql属组为mysql.
+chown mysql.mysql /usr/share/mysql/data
+
+7.对file.txt添加644权限
+chmod 644 file.txt
+
+8.使用setfacl添加file.txt文件，属主alice读写的权限。
+setfacl -m u:alice:rw file.txt	
+
+9.查看file.txt文件acl权限列表。
+getfacl file.txt
+
+10.为/usr/bin/cat文件授予sgid权限。
+chmod	g+s /usr/bin/cat
+
+11.查看进程信息。并按照%cpu进行排序(升序)
+ps aux --sort %cpu | less
+
+12.动态查询7139进程信息，两次。
+top -p 7139 -b -n 2		//查看sshd服务两次
+
+13.查看ssh进程的pid
+ps aux|gerp sshd	
+
+14.使某个进程在前台运行
+fg 作业号
+
+15.杀死pid为2的进程 
+kill 2	
+
+16.使用重定向从1.txt文件读取内容，以邮件的方式发送给alice用户。
+mail -s "test01" alice < /etc/1.txt
+
+17.使用EOF为1.txt文件输入一段文字。
+cat >1.txt <<EOF			//段落标记
+  > 111
+  > 222
+  > 333
+  > EOF
+
+18.使用fdisk分区格式化/dev/sdb，并挂载/sdb1分区至/mysql目录。
+fdisk(gdisk) /dev/sdb	//分区
+  mkfs.ext4 /dev/sdb1	//格式化
+  mkfs.xfs  /dev/sdb1
+  mkdir /mysql		//挂载
+  mount /dev/sdb1 /mysql
+  blkid 或者 df -hT	//查看挂载
+
+19.将/dev/sdc磁盘配置为逻辑卷，格式化为xfs，并挂载至/mysql目录
+pvcreate /dev/sdc
+  vgcreate vg /dev/sdc
+  lvcreate -L 200M -n lv vg
+  mkfs.xfs /dev/vg/lv
+  mount -t xfs /dev/vg/lv /mysql
+
+20.逻辑卷/dev/vg1/lv2扩容 ,通过VG剩余空间20%比例来扩展LV2
+ pvcreate /dev/sdd1
+ vgextend vg1 /dev/sdd1
+ lvextend -l 20%FREE /dev/VG/LV2
+
+21.创建软连接
+ln -s /file1 /home/file11
+
+22.命令文件查找,修改时间超过5天的文件。
+ find /etc -mtime +5
+
+23.打包压缩/etc目录。
+ tar -cf etc.tar /etc	
+
+
+24.使用DVD光盘作为YUM源，请写出YUM配置文件。
+vim   /etc/yum.repos.d/dvd.repo
+[dvd]
+name=dvd
+baseurl=file:///mnt
+enabled=1
+gpgcheck=0
+
+25.源码安装的步骤。
+  搭建编译环境
+  配置配置 ./configure  	\截下一行
+  编译 make
+  安装 make install
+  启动测试 	
+
+26.删除计划
+crontab -r
+
+27.锁定网站错误日志文件的尾部在屏幕上
+tail -f /var/log/nginx/error.log
+
+28.写出如下轮转规则的配置信息。日志文件：/var/log/yum.log，丢失不执行，空文件不论转，大小达到30k轮转，或者一年一轮转，延迟压缩，缩小周期到1天，轮转保留3次
+ # vim /etc/logrotate.d/yum 
+ /var/log/yum.log {
+ missingok		//丢失不执行
+ # notifempty		//空文件不论转
+ # size 30k		//大小达到30k轮转,	 daily or  size两个维度
+ # yearly		//或者一年一轮转
+ # delaycompress //等会儿再压缩
+ daily		//缩小周期到1天
+ rotate 3		//轮转保留3次
+ create 0777 root root
+ }
+
+
+
+
